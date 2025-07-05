@@ -1,4 +1,4 @@
-librosa==0.10.1         # For audio feature extraction
-numpy==1.26.4           # For math & signal processing
-soundfile==0.12.1       # To load/save audio files
-PySimpleGUI==4.60.5     # For the optional GUI
+librosa>=0.10.2
+numpy>=1.26.4
+soundfile>=0.12.1
+PySimpleGUI>=5.0.8
