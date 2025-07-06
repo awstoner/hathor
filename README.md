@@ -1,4 +1,4 @@
-# Audio Sample Organizer
+# Hathor
 
 A powerful tool for analyzing, organizing, and classifying audio samples using machine learning.
 
@@ -19,8 +19,8 @@ A powerful tool for analyzing, organizing, and classifying audio samples using m
 
 1. **Clone the repository:**
 ```bash
-git clone https://github.com/yourusername/audio-sample-organizer.git
-cd audio-sample-organizer
+git clone https://github.com/awstoner/hathor.git
+cd hathor
 ```
 
 2. **Setup virtual environment:**
@@ -97,7 +97,7 @@ The system classifies audio into these categories:
 ## Repository Structure
 
 ```
-audio-sample-organizer/
+hathor/
 ├── organizer.py                 # Main application
 ├── requirements.txt             # Python dependencies
 ├── README.md                    # This file

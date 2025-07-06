@@ -184,9 +184,9 @@ def launch_gui(records):
     ctk.set_default_color_theme("blue")
     
     app = ctk.CTk()
-    app.title("Audio Sample Organizer")
-    app.geometry("1400x800")
-    app.minsize(1000, 600)
+    app.title("Hathor - Audio Sample Organizer")
+    app.geometry("1600x900")
+    app.minsize(1200, 700)
     
     # Audio playback variables
     current_audio = None
@@ -197,57 +197,109 @@ def launch_gui(records):
     sort_column = None
     sort_reverse = False
     
-    # Create gradient-like effect with multiple frames
-    main_frame = ctk.CTkFrame(app, fg_color=("gray90", "gray15"))
-    main_frame.pack(fill="both", expand=True, padx=15, pady=15)
+    # Create modern gradient background
+    main_frame = ctk.CTkFrame(app, fg_color=("gray95", "gray10"))
+    main_frame.pack(fill="both", expand=True, padx=20, pady=20)
     
-    # Title with better styling
+    # Modern title with Hathor branding
+    title_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+    title_frame.pack(fill="x", pady=(0, 20))
+    
     title_label = ctk.CTkLabel(
-        main_frame, 
-        text="🎵 Audio Sample Analysis Results", 
-        font=ctk.CTkFont(size=28, weight="bold"),
-        text_color=("gray20", "white")
+        title_frame, 
+        text="𓃭 Hathor", 
+        font=ctk.CTkFont(size=36, weight="bold"),
+        text_color=("#FFD700", "#FFA500")  # Egyptian gold
     )
-    title_label.pack(pady=(15, 25))
-    stats_frame = ctk.CTkFrame(main_frame)
-    stats_frame.pack(fill="x", padx=10, pady=(0, 10))
+    title_label.pack(side="left", padx=(0, 10))
+    
+    subtitle_label = ctk.CTkLabel(
+        title_frame,
+        text="Audio Sample Organizer",
+        font=ctk.CTkFont(size=18, weight="normal"),
+        text_color=("gray40", "gray60")
+    )
+    subtitle_label.pack(side="left", pady=(8, 0))
+    # Modern stats display
+    stats_frame = ctk.CTkFrame(main_frame, fg_color=("gray90", "gray20"), corner_radius=12)
+    stats_frame.pack(fill="x", padx=10, pady=(0, 15))
+    
     total_files = len(records)
     categories = {}
     for record in records:
         category = record[1]
         categories[category] = categories.get(category, 0) + 1
-    stats_text = f"Total Files: {total_files} | "
-    stats_text += " | ".join([f"{cat}: {count}" for cat, count in categories.items()])
-    stats_label = ctk.CTkLabel(stats_frame, text=stats_text, font=ctk.CTkFont(size=14))
-    stats_label.pack(pady=10)
     
-    # Search and filter controls
-    search_frame = ctk.CTkFrame(main_frame)
-    search_frame.pack(fill="x", padx=10, pady=(0, 10))
+    stats_label = ctk.CTkLabel(
+        stats_frame, 
+        text=f"📊 {total_files} samples analyzed", 
+        font=ctk.CTkFont(size=16, weight="bold"),
+        text_color=("gray20", "white")
+    )
+    stats_label.pack(pady=(15, 5))
     
-    # Search box
-    search_label = ctk.CTkLabel(search_frame, text="Search:", font=ctk.CTkFont(size=12, weight="bold"))
-    search_label.pack(side="left", padx=(10, 5))
+    # Category breakdown
+    category_text = " | ".join([f"{cat.replace('_', ' ').title()}: {count}" for cat, count in categories.items()])
+    category_label = ctk.CTkLabel(
+        stats_frame, 
+        text=category_text, 
+        font=ctk.CTkFont(size=14),
+        text_color=("gray40", "gray70")
+    )
+    category_label.pack(pady=(0, 15))
+    
+    # Modern search and filter controls
+    search_frame = ctk.CTkFrame(main_frame, fg_color=("gray92", "gray18"), corner_radius=10)
+    search_frame.pack(fill="x", padx=10, pady=(0, 15))
+    
+    # Left side controls
+    left_controls = ctk.CTkFrame(search_frame, fg_color="transparent")
+    left_controls.pack(side="left", padx=15, pady=10)
+    
+    # Search box with modern styling
+    search_label = ctk.CTkLabel(left_controls, text="🔍 Search:", font=ctk.CTkFont(size=14, weight="bold"))
+    search_label.pack(side="left", padx=(0, 8))
     
     search_var = tk.StringVar()
-    search_entry = ctk.CTkEntry(search_frame, textvariable=search_var, width=200, placeholder_text="Search files...")
-    search_entry.pack(side="left", padx=(0, 10))
+    search_entry = ctk.CTkEntry(
+        left_controls, 
+        textvariable=search_var,
+        placeholder_text="Search files...", 
+        width=250,
+        height=32,
+        corner_radius=8
+    )
+    search_entry.pack(side="left", padx=(0, 15))
     
-    # Category filter
-    filter_label = ctk.CTkLabel(search_frame, text="Category:", font=ctk.CTkFont(size=12, weight="bold"))
-    filter_label.pack(side="left", padx=(10, 5))
+    # Category filter with modern styling
+    filter_label = ctk.CTkLabel(left_controls, text="🎯 Filter:", font=ctk.CTkFont(size=14, weight="bold"))
+    filter_label.pack(side="left", padx=(0, 8))
     
     categories = ["All"] + list(set([record[1] if len(record) == 4 else record[1] for record in records]))
     filter_var = tk.StringVar(value="All")
-    filter_dropdown = ctk.CTkOptionMenu(search_frame, variable=filter_var, values=categories, width=120)
-    filter_dropdown.pack(side="left", padx=(0, 10))
+    filter_dropdown = ctk.CTkOptionMenu(
+        left_controls, 
+        variable=filter_var, 
+        values=categories, 
+        width=150,
+        height=32,
+        corner_radius=8
+    )
+    filter_dropdown.pack(side="left", padx=(0, 15))
     
-    # Audio controls
-    audio_label = ctk.CTkLabel(search_frame, text="Audio:", font=ctk.CTkFont(size=12, weight="bold"))
-    audio_label.pack(side="left", padx=(10, 5))
+    # Audio controls with modern styling
+    audio_label = ctk.CTkLabel(left_controls, text="🎵 Audio:", font=ctk.CTkFont(size=14, weight="bold"))
+    audio_label.pack(side="left", padx=(0, 8))
     
-    stop_button = ctk.CTkButton(search_frame, text="⏹️ Stop", width=80, command=lambda: stop_audio())
-    stop_button.pack(side="left", padx=(0, 10))
+    stop_button = ctk.CTkButton(
+        left_controls, 
+        text="⏹️ Stop", 
+        width=80, 
+        height=32,
+        corner_radius=8,
+        command=lambda: stop_audio()
+    )
+    stop_button.pack(side="left", padx=(0, 15))
     
     # Audio playback functions
     def init_pygame():
@@ -402,10 +454,10 @@ def launch_gui(records):
             else:
                 file_path, category, features = record
                 confidence = None
-            # Create a frame for this row to handle clicks
-            row_frame = ctk.CTkFrame(scrollable_frame, fg_color=("gray70", "gray30"))
+            # Create a modern frame for this row to handle clicks
+            row_frame = ctk.CTkFrame(scrollable_frame, fg_color=("gray85", "gray25"), corner_radius=6)
             row_frame.grid(row=row_idx, column=0, columnspan=len(headers), padx=2, pady=1, sticky="ew")
-            row_frame.original_fg = ("gray70", "gray30")  # Store original color
+            row_frame.original_fg = ("gray85", "gray25")  # Store original color
             
             file_name = file_path.name
             if len(file_name) > 40:
@@ -426,7 +478,7 @@ def launch_gui(records):
                 corner_radius=8,
                 width=col_widths[1],
                 anchor="w",
-                font=ctk.CTkFont(size=11, weight="bold")
+                font=ctk.CTkFont(size=12, weight="bold")
             )
             category_label.grid(row=0, column=1, padx=2, pady=2, sticky="ew")
             category_label.original_fg = category_colors.get(category, "#95A5A6")  # Always keep this
@@ -504,9 +556,9 @@ def launch_gui(records):
     # Bind search and filter events
     search_var.trace("w", lambda *args: filter_records())
     filter_var.trace("w", lambda *args: filter_records())
-    # Table
-    table_frame = ctk.CTkFrame(main_frame)
-    table_frame.pack(fill="both", expand=True, padx=10, pady=(0, 10))
+    # Modern table
+    table_frame = ctk.CTkFrame(main_frame, fg_color=("gray90", "gray20"), corner_radius=12)
+    table_frame.pack(fill="both", expand=True, padx=10, pady=(0, 15))
     headers = ["File", "Category", "Duration (s)", "Bass %", "Transient", "Harmonic %", "Pitch", "Brightness", "Energy", "Noise", "Confidence"]
     col_widths = [250, 120, 100, 100, 100, 120, 100, 100, 100, 100, 140]
     # Scrollable canvas
@@ -521,18 +573,21 @@ def launch_gui(records):
     canvas.configure(yscrollcommand=scrollbar.set)
     canvas.pack(side="left", fill="both", expand=True, padx=(5, 0), pady=5)
     scrollbar.pack(side="right", fill="y", pady=5)
-    # Header row - make clickable for sorting
+    # Modern header row - make clickable for sorting
     header_labels = []
     for i, (header, width) in enumerate(zip(headers, col_widths)):
         label = ctk.CTkLabel(
             scrollable_frame, 
             text=header, 
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ctk.CTkFont(size=13, weight="bold"),
             width=width,
             anchor="w",
-            cursor="hand2"  # Show hand cursor on hover
+            cursor="hand2",  # Show hand cursor on hover
+            fg_color=("#4169E1", "#1E90FF"),  # Royal blue
+            text_color="white",
+            corner_radius=6
         )
-        label.grid(row=0, column=i, padx=2, pady=2, sticky="ew")
+        label.grid(row=0, column=i, padx=2, pady=3, sticky="ew")
         label.bind("<Button-1>", lambda event, col=i: sort_records(col))
         header_labels.append(label)
         scrollable_frame.grid_columnconfigure(i, minsize=width, weight=1)
@@ -551,9 +606,10 @@ def launch_gui(records):
     
     # Build initial table
     rebuild_table()
-    # Bottom buttons
-    button_frame = ctk.CTkFrame(main_frame)
-    button_frame.pack(fill="x", padx=10, pady=(0, 10))
+    # Modern bottom buttons
+    button_frame = ctk.CTkFrame(main_frame, fg_color=("gray92", "gray18"), corner_radius=10)
+    button_frame.pack(fill="x", padx=10, pady=(0, 15))
+    
     def export_results():
         import csv
         from tkinter import filedialog
@@ -579,21 +635,43 @@ def launch_gui(records):
                         f"{features['spectral_flatness']:.2f}",
                         f"{confidence*100:.1f}%" if confidence else "N/A"
                     ])
-            status_label.configure(text=f"Exported to {filename}")
+            status_label.configure(text=f"📤 Exported to {filename}")
+    
+    # Left side buttons
+    left_buttons = ctk.CTkFrame(button_frame, fg_color="transparent")
+    left_buttons.pack(side="left", padx=15, pady=10)
+    
     export_button = ctk.CTkButton(
-        button_frame, 
-        text="Export to CSV", 
+        left_buttons, 
+        text="📤 Export to CSV", 
         command=export_results,
-        width=120
+        width=140,
+        height=32,
+        corner_radius=8,
+        fg_color=("#4169E1", "#1E90FF"),  # Royal blue
+        hover_color=("#2E4B8F", "#1874CD")
     )
     export_button.pack(side="left", padx=(0, 10))
-    status_label = ctk.CTkLabel(button_frame, text="Ready")
+    
+    status_label = ctk.CTkLabel(
+        left_buttons, 
+        text="✨ Ready", 
+        font=ctk.CTkFont(size=14),
+        text_color=("gray40", "gray70")
+    )
     status_label.pack(side="left", padx=10)
+    
+    # Right side buttons
+    right_buttons = ctk.CTkFrame(button_frame, fg_color="transparent")
+    right_buttons.pack(side="right", padx=15, pady=10)
+    
     close_button = ctk.CTkButton(
-        button_frame, 
-        text="Close", 
+        right_buttons, 
+        text="✖️ Close", 
         command=app.destroy,
-        width=80
+        width=100,
+        height=32,
+        corner_radius=8
     )
     close_button.pack(side="right")
     app.mainloop()
@@ -671,7 +749,7 @@ def use_model(records, model_path):
 # -----------------------------
 
 def main():  # noqa: C901 – simple script
-    parser = argparse.ArgumentParser(description="Analyse & organise audio samples using ML classification")
+    parser = argparse.ArgumentParser(description="Hathor - Analyse & organise audio samples using ML classification")
     parser.add_argument("--input-dir", type=Path, required=True, help="Folder with .mp3/.wav files")
     parser.add_argument("--output-dir", type=Path, help="Destination root for organised samples")
     parser.add_argument("--move", action="store_true", help="Actually move files instead of reporting only")
