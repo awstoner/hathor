@@ -7,9 +7,13 @@ A powerful tool for analyzing, organizing, and classifying audio samples using m
 - **Audio Analysis**: Extract 14 key audio features for comprehensive analysis
 - **Machine Learning**: Pre-trained model for accurate classification
 - **Modern GUI**: Beautiful interface built with CustomTkinter
+- **Audio Playback**: Listen to samples directly in the GUI with play/stop controls
+- **Smart Sorting**: Click any column header to sort by that feature
+- **Search & Filter**: Find samples by filename or filter by category
+- **Enhanced Features**: View brightness, energy, noise levels, and more
+- **Confidence Scores**: See ML model confidence with visual progress bars
 - **Export Capabilities**: Save results to CSV for further analysis
-- **Audio Playback**: Listen to samples directly in the GUI
-- **Smart Sorting**: Sort by any feature or category
+- **Colorblind-Friendly**: High-contrast colors for easy category identification
 
 ## Installation
 
@@ -79,16 +83,21 @@ python organizer.py --input-dir ./example_samples --model audio_classifier.jobli
 ## Audio Categories
 
 The system can classify audio into these categories:
-- **kick_bass_oneshot**: Short bass-heavy samples (≤2s, ≥30% bass)
-- **drum_loop**: Longer rhythmic patterns (>2s, high transients)
-- **hi_hat**: High-frequency, short samples
-- **snare**: Medium-high frequency, high transient samples
-- **clap**: Very short, high transient samples
-- **vocal_loop**: Harmonic content with clear pitch
-- **other**: Everything else
+- **kick**: Short, punchy kick drum samples
+- **808**: Bass-heavy 808 samples with longer tails
+- **bass**: Other bass samples and sub-bass
+- **snare**: Snare drum samples with high transients
+- **hi_hat**: High-frequency hi-hat and cymbal samples
+- **clap**: Short, sharp clap and percussion samples
+- **drum_loop**: Full drum loops and rhythmic patterns
+- **vocal_loop**: Vocal samples with clear pitch and harmonic content
+- **other**: Everything else that doesn't fit the above categories
 
 ## Features Extracted
 
+The system extracts 14 comprehensive audio features:
+
+### **Basic Features**
 1. **duration**: Length in seconds
 2. **centroid_mean**: Perceived brightness
 3. **low_energy_ratio**: Bass frequency content
@@ -97,6 +106,14 @@ The system can classify audio into these categories:
 6. **harmonic_ratio**: Harmonic vs noise content
 7. **spectral_contrast**: Frequency variation
 8. **pitch_strength**: Pitch clarity
+
+### **Enhanced Features**
+9. **mfcc_mean**: Mel-frequency cepstral coefficients
+10. **rms_mean**: Root mean square energy
+11. **zero_crossing_rate**: Waveform complexity
+12. **spectral_bandwidth**: Frequency spread
+13. **spectral_flatness**: Noise vs tonal content
+14. **chroma_stft_mean**: Musical note characteristics
 
 ## Machine Learning
 
@@ -122,12 +139,40 @@ See `audio_classifier_results.png` for detailed performance metrics.
 
 ## GUI Features
 
-The CustomTkinter GUI provides:
+The CustomTkinter GUI provides a comprehensive interface for audio sample analysis:
+
+### **Interactive Table**
 - **Scrollable table** with all analysis results
+- **Clickable column headers** for sorting by any feature
+- **Row highlighting** during audio playback
 - **Color-coded categories** for easy identification
+
+### **Audio Analysis Features**
+- **Duration**: Length of each sample
+- **Bass %**: Low-frequency energy content
+- **Transient**: Attack/punch strength
+- **Harmonic %**: Musical vs noise content
+- **Pitch**: Pitch clarity and strength
+- **Brightness**: How bright/harsh the sound is
+- **Energy**: Overall loudness/energy level
+- **Noise**: How noisy vs tonal the sound is
+- **Confidence**: ML model confidence with progress bars
+
+### **Search & Organization**
+- **Real-time search** by filename
+- **Category filtering** dropdown
 - **Statistics summary** showing file counts per category
 - **Export to CSV** functionality
+
+### **Audio Playback**
+- **Play/Stop controls** for listening to samples
+- **Auto-stop** when playback finishes
+- **Visual feedback** during playback
+
+### **Accessibility**
 - **Dark mode** interface
+- **Colorblind-friendly** category colors
+- **High-contrast** design for easy reading
 
 ## Customization
 
