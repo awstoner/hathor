@@ -94,7 +94,7 @@ features*.csv
 # Audio files (too large for repo)
 samples/
 example/
-*.wav
+# *.wav
 *.mp3
 *.flac
 *.aiff
