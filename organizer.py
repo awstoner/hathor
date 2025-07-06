@@ -85,7 +85,7 @@ CATEGORY_FOLDERS = {
 # -----------------------------
 
 def extract_features(file_path: Path) -> dict[str, float]:
-    """Load *file_path* and compute a handful of lightweight descriptors."""
+    """Load *file_path* and compute a set of audio descriptors for ML."""
     y, sr = librosa.load(file_path, sr=None, mono=True)  # keep native SR
 
     # Duration (s)
@@ -120,6 +120,29 @@ def extract_features(file_path: Path) -> dict[str, float]:
     pitches, magnitudes = librosa.piptrack(y=y, sr=sr)
     pitch_strength = float(np.mean(magnitudes))
 
+    # --- Additional features for ML ---
+    # MFCCs (Mel-frequency cepstral coefficients)
+    mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
+    mfcc_mean = float(np.mean(mfccs))
+
+    # RMS energy
+    rms = librosa.feature.rms(y=y)
+    rms_mean = float(np.mean(rms))
+
+    # Zero-crossing rate
+    zcr = librosa.feature.zero_crossing_rate(y)
+    zero_crossing_rate = float(np.mean(zcr))
+
+    # Spectral bandwidth
+    spectral_bandwidth = float(np.mean(librosa.feature.spectral_bandwidth(y=y, sr=sr)))
+
+    # Spectral flatness
+    spectral_flatness = float(np.mean(librosa.feature.spectral_flatness(y=y)))
+
+    # Chroma STFT
+    chroma_stft = librosa.feature.chroma_stft(y=y, sr=sr)
+    chroma_stft_mean = float(np.mean(chroma_stft))
+
     return {
         "duration": duration,
         "centroid_mean": centroid_mean,
@@ -129,74 +152,13 @@ def extract_features(file_path: Path) -> dict[str, float]:
         "harmonic_ratio": harmonic_ratio,
         "spectral_contrast": spectral_contrast,
         "pitch_strength": pitch_strength,
+        "mfcc_mean": mfcc_mean,
+        "rms_mean": rms_mean,
+        "zero_crossing_rate": zero_crossing_rate,
+        "spectral_bandwidth": spectral_bandwidth,
+        "spectral_flatness": spectral_flatness,
+        "chroma_stft_mean": chroma_stft_mean,
     }
-
-
-# -----------------------------
-# Rule‑based classifier
-# -----------------------------
-
-def categorise(feats: dict[str, float]) -> str:
-    """Return a label based on simple, interpretable heuristics."""
-    
-    # 808: longer tail, more harmonic, bass-heavy
-    if (
-        feats["duration"] <= MAX_ONESHOT_DURATION
-        and feats["low_energy_ratio"] >= BASS_ENERGY_RATIO_THRESHOLD
-        and feats["harmonic_ratio"] > 0.5  # More harmonic content
-        and feats["duration"] > 0.8  # Longer tail
-    ):
-        return "808"
-    
-    # Kick: big transient, shorter tail, bass-heavy
-    elif (
-        feats["duration"] <= MAX_ONESHOT_DURATION
-        and feats["low_energy_ratio"] >= BASS_ENERGY_RATIO_THRESHOLD
-        and feats["transient_strength"] > 0.4  # Big transient
-        and feats["duration"] <= 0.8  # Shorter tail
-    ):
-        return "kick"
-    
-    # Generic bass (if it doesn't fit kick or 808 patterns)
-    elif (
-        feats["duration"] <= MAX_ONESHOT_DURATION
-        and feats["low_energy_ratio"] >= BASS_ENERGY_RATIO_THRESHOLD
-    ):
-        return "bass"
-
-    # Drum loop (long & transient-heavy)
-    if (
-        feats["duration"] > MAX_ONESHOT_DURATION
-        and feats["transient_strength"] >= TRANSIENT_STRENGTH_THRESHOLD
-    ):
-        return "drum_loop"
-
-    # Hi-hats: high centroid, high rolloff, short duration
-    if (feats["centroid_mean"] > 3000 and 
-        feats["spectral_rolloff"] > 8000 and 
-        feats["duration"] < 1.0):
-        return "hi_hat"
-    
-    # Snares: medium-high centroid, high transient, medium duration
-    elif (feats["centroid_mean"] > 1500 and 
-          feats["transient_strength"] > 0.4 and 
-          0.5 < feats["duration"] < 2.0):
-        return "snare"
-    
-    # Claps: very high transient, short duration
-    elif (feats["transient_strength"] > 0.6 and 
-          feats["duration"] < 0.5):
-        return "clap"
-    
-    # Vocal loops: high harmonic content, clear pitch, longer duration
-    elif (feats["harmonic_ratio"] > 0.6 and 
-          feats["pitch_strength"] > 0.1 and 
-          feats["duration"] > 1.0 and
-          feats["spectral_contrast"] > 0.3):
-        return "vocal_loop"
-
-    # Fallback
-    return "other"
 
 
 # -----------------------------
@@ -392,7 +354,13 @@ def launch_gui(records):
                 return features['harmonic_ratio']
             elif column_index == 6:  # Pitch
                 return features['pitch_strength']
-            elif column_index == 7:  # Confidence
+            elif column_index == 7:  # Brightness
+                return features['centroid_mean']
+            elif column_index == 8:  # Energy
+                return features['rms_mean']
+            elif column_index == 9:  # Noise
+                return features['spectral_flatness']
+            elif column_index == 10:  # Confidence
                 return confidence if confidence is not None else 0.0
             return 0
         
@@ -468,7 +436,10 @@ def launch_gui(records):
                 f"{features['low_energy_ratio']*100:.1f}%",
                 f"{features['transient_strength']:.2f}",
                 f"{features['harmonic_ratio']*100:.1f}%",
-                f"{features['pitch_strength']:.2f}"
+                f"{features['pitch_strength']:.2f}",
+                f"{features['centroid_mean']:.0f}",
+                f"{features['rms_mean']:.2f}",
+                f"{features['spectral_flatness']:.2f}"
             ]
             
             for col_idx, (value, width) in enumerate(zip(values, col_widths[2:-1]), start=2):
@@ -536,8 +507,8 @@ def launch_gui(records):
     # Table
     table_frame = ctk.CTkFrame(main_frame)
     table_frame.pack(fill="both", expand=True, padx=10, pady=(0, 10))
-    headers = ["File", "Category", "Duration (s)", "Bass %", "Transient", "Harmonic %", "Pitch", "Confidence"]
-    col_widths = [250, 120, 100, 100, 100, 120, 100, 140]
+    headers = ["File", "Category", "Duration (s)", "Bass %", "Transient", "Harmonic %", "Pitch", "Brightness", "Energy", "Noise", "Confidence"]
+    col_widths = [250, 120, 100, 100, 100, 120, 100, 100, 100, 100, 140]
     # Scrollable canvas
     canvas = ctk.CTkCanvas(table_frame, highlightthickness=0)
     scrollbar = ctk.CTkScrollbar(table_frame, orientation="vertical", command=canvas.yview)
@@ -594,7 +565,7 @@ def launch_gui(records):
             with open(filename, 'w', newline='') as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow(headers)
-                for file_path, category, features in records:
+                for file_path, category, features, confidence in records:
                     writer.writerow([
                         str(file_path),
                         category,
@@ -602,7 +573,11 @@ def launch_gui(records):
                         f"{features['low_energy_ratio']*100:.1f}%",
                         f"{features['transient_strength']:.2f}",
                         f"{features['harmonic_ratio']*100:.1f}%",
-                        f"{features['pitch_strength']:.2f}"
+                        f"{features['pitch_strength']:.2f}",
+                        f"{features['centroid_mean']:.0f}",
+                        f"{features['rms_mean']:.2f}",
+                        f"{features['spectral_flatness']:.2f}",
+                        f"{confidence*100:.1f}%" if confidence else "N/A"
                     ])
             status_label.configure(text=f"Exported to {filename}")
     export_button = ctk.CTkButton(
@@ -628,37 +603,14 @@ def launch_gui(records):
 # ML functionality
 # -----------------------------
 
-def export_features(records, export_path):
-    """Export features and labels to CSV for ML training."""
-    if not ML_AVAILABLE:
-        sys.exit("pandas not installed. Install via: pip install pandas")
-    
-    data = []
-    for file_path, category, features in records:
-        row = {
-            'file_path': str(file_path),
-            'duration': features['duration'],
-            'centroid_mean': features['centroid_mean'],
-            'low_energy_ratio': features['low_energy_ratio'],
-            'transient_strength': features['transient_strength'],
-            'spectral_rolloff': features['spectral_rolloff'],
-            'harmonic_ratio': features['harmonic_ratio'],
-            'spectral_contrast': features['spectral_contrast'],
-            'pitch_strength': features['pitch_strength'],
-            'label': category
-        }
-        data.append(row)
-    
-    df = pd.DataFrame(data)
-    df.to_csv(export_path, index=False)
-    print(f"Exported {len(data)} samples to {export_path}")
+
 
 
 def use_model(records, model_path):
     """Use trained ML model for classification."""
     if not ML_AVAILABLE:
         sys.exit("scikit-learn not installed. Install via: pip install scikit-learn")
-    
+
     try:
         # Load both model and metadata
         model = joblib.load(model_path)
@@ -667,10 +619,10 @@ def use_model(records, model_path):
         print(f"Loaded model from {model_path}")
     except Exception as e:
         sys.exit(f"Failed to load model: {e}")
-    
+
     # Extract features for prediction
     features_list = []
-    for _, _, features in records:
+    for _, features in records:
         feature_vector = [
             features['duration'],
             features['centroid_mean'],
@@ -679,32 +631,38 @@ def use_model(records, model_path):
             features['spectral_rolloff'],
             features['harmonic_ratio'],
             features['spectral_contrast'],
-            features['pitch_strength']
+            features['pitch_strength'],
+            features['mfcc_mean'],
+            features['rms_mean'],
+            features['zero_crossing_rate'],
+            features['spectral_bandwidth'],
+            features['spectral_flatness'],
+            features['chroma_stft_mean'],
         ]
         features_list.append(feature_vector)
-    
+
     # Predict
     predictions_encoded = model.predict(features_list)
     proba = model.predict_proba(features_list)
-    
+
     # Decode predictions back to category names
     predictions = label_encoder.inverse_transform(predictions_encoded)
-    
+
     # Get confidence for each prediction
     confidences = [float(np.max(p)) for p in proba]
-    
+
     # Update records with ML predictions and confidence
     ml_records = []
-    for i, (file_path, _, features) in enumerate(records):
+    for i, (file_path, features) in enumerate(records):
         ml_records.append((file_path, predictions[i], features, confidences[i]))
-    
+
     # Print results
     print("\nML Model Predictions:")
     for p, c, feats, conf in ml_records:
         print(
             f"{p.name:<40} → {c:<18} | {feats['duration']:.2f}s | bass:{feats['low_energy_ratio']*100:.1f}% | trans:{feats['transient_strength']:.2f} | conf:{conf*100:.1f}%"
         )
-    
+
     return ml_records
 
 
@@ -713,13 +671,12 @@ def use_model(records, model_path):
 # -----------------------------
 
 def main():  # noqa: C901 – simple script
-    parser = argparse.ArgumentParser(description="Analyse & organise audio samples")
+    parser = argparse.ArgumentParser(description="Analyse & organise audio samples using ML classification")
     parser.add_argument("--input-dir", type=Path, required=True, help="Folder with .mp3/.wav files")
     parser.add_argument("--output-dir", type=Path, help="Destination root for organised samples")
     parser.add_argument("--move", action="store_true", help="Actually move files instead of reporting only")
     parser.add_argument("--gui", action="store_true", help="Launch GUI (requires customtkinter)")
-    parser.add_argument("--export-features", type=Path, help="Export features for ML training")
-    parser.add_argument("--model", type=Path, help="Use ML model for classification")
+    parser.add_argument("--model", type=Path, default="audio_classifier.joblib", help="ML model path (default: audio_classifier.joblib)")
     args = parser.parse_args()
 
     if args.gui and not GUI_AVAILABLE:
@@ -733,33 +690,24 @@ def main():  # noqa: C901 – simple script
     for path in audio_files:
         try:
             feats = extract_features(path)
-            label = categorise(feats)
-            records.append((path, label, feats))
+            records.append((path, feats))
             if args.move and args.output_dir:
-                maybe_move(path, args.output_dir, label)
+                maybe_move(path, args.output_dir, feats)
         except Exception as exc:  # broad – quick script
             print(f"⚠️ {path.name}: {exc}", file=sys.stderr)
 
     # CLI summary
-    for p, c, feats in records:
+    for p, feats in records:
         print(
-            f"{p.name:<40} → {c:<18} | {feats['duration']:.2f}s | bass:{feats['low_energy_ratio']*100:.1f}% | trans:{feats['transient_strength']:.2f}"
+            f"{p.name:<40} | {feats['duration']:.2f}s | bass:{feats['low_energy_ratio']*100:.1f}% | trans:{feats['transient_strength']:.2f}"
         )
 
-    # If using ML model, get ML predictions
-    ml_records = None
-    if args.model:
-        ml_records = use_model(records, args.model)
+    # Use ML model for classification
+    ml_records = use_model(records, args.model)
 
-    if args.export_features:
-        export_features(records, args.export_features)
-
-    # If both --gui and --model, show ML predictions in GUI
+    # Launch GUI if requested
     if args.gui:
-        if ml_records is not None:
-            launch_gui(ml_records)
-        else:
-            launch_gui(records)
+        launch_gui(ml_records)
 
 
 if __name__ == "__main__":

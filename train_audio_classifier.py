@@ -42,7 +42,9 @@ def load_and_prepare_data(csv_path):
     # Separate features and labels
     feature_columns = [
         'duration', 'centroid_mean', 'low_energy_ratio', 'transient_strength',
-        'spectral_rolloff', 'harmonic_ratio', 'spectral_contrast', 'pitch_strength'
+        'spectral_rolloff', 'harmonic_ratio', 'spectral_contrast', 'pitch_strength',
+        'mfcc_mean', 'rms_mean', 'zero_crossing_rate', 'spectral_bandwidth',
+        'spectral_flatness', 'chroma_stft_mean'
     ]
     
     # Check if all required columns exist

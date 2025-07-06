@@ -78,19 +78,18 @@ $RECYCLE.BIN/
 .nfs*
 
 # Audio Sample Organizer Specific
-# Trained ML models (exclude user-generated, but allow included models)
-*.joblib
-*.pkl
-*.pickle
-# Allow specific included models
-!audio_classifier.joblib
-!audio_classifier_metadata.joblib
-
-# Generated feature datasets
+# Training scripts and datasets (exclude from public repo)
+train_audio_classifier.py
+extract_features_to_csv.py
+test_ml_model.py
 features*.csv
 *_features.csv
 *_labeled.csv
 *_training.csv
+
+# Allow the pre-trained model
+!audio_classifier.joblib
+!audio_classifier_metadata.joblib
 
 # Audio files (too large for repo)
 samples/

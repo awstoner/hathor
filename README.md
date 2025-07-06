@@ -1,14 +1,15 @@
-# Audio Sample Organizer with ML Classification
+# Audio Sample Organizer
 
-A powerful tool for analyzing, organizing, and classifying audio samples using both rule-based heuristics and machine learning.
+A powerful tool for analyzing, organizing, and classifying audio samples using machine learning.
 
 ## Features
 
-- **Audio Analysis**: Extract 8 key audio features (duration, spectral centroid, bass energy, etc.)
-- **Rule-based Classification**: Quick categorization using interpretable heuristics
-- **Machine Learning**: Train custom models for improved accuracy
+- **Audio Analysis**: Extract 14 key audio features for comprehensive analysis
+- **Machine Learning**: Pre-trained model for accurate classification
 - **Modern GUI**: Beautiful interface built with CustomTkinter
 - **Export Capabilities**: Save results to CSV for further analysis
+- **Audio Playback**: Listen to samples directly in the GUI
+- **Smart Sorting**: Sort by any feature or category
 
 ## Installation
 
@@ -29,19 +30,11 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. **Test the ML model (optional):**
-```bash
-python test_ml_model.py
-```
-
 ## Repository Structure
 
 ```
 audio-sample-organizer/
 ├── organizer.py                 # Main application
-├── train_audio_classifier.py    # ML training script
-├── extract_features_to_csv.py   # Feature extraction utility
-├── test_ml_model.py            # Test script for ML model
 ├── requirements.txt             # Python dependencies
 ├── README.md                    # This file
 ├── .gitignore                   # Git ignore rules
@@ -68,9 +61,8 @@ python organizer.py --input-dir ./example_samples --output-dir ./organized --mov
 python organizer.py --input-dir ./example_samples --gui
 ```
 
-### Machine Learning Pipeline
+### Using the Pre-trained Model
 
-#### Option 1: Use Pre-trained Model (Recommended for Quick Start)
 The repository includes a pre-trained model that you can use immediately:
 
 ```bash
@@ -79,23 +71,8 @@ python organizer.py --input-dir ./example_samples --model audio_classifier.jobli
 
 # Use the included ML model for file organization
 python organizer.py --input-dir ./example_samples --model audio_classifier.joblib --output-dir ./organized --move
-```
 
-#### Option 2: Train Your Own Model
-If you want to train on your own data:
-
-1. **Export features for training:**
-```bash
-python organizer.py --input-dir ./example_samples --export-features features.csv
-```
-
-2. **Train ML model:**
-```bash
-python train_audio_classifier.py features.csv
-```
-
-3. **Use your trained model:**
-```bash
+# Use the included ML model for analysis only
 python organizer.py --input-dir ./example_samples --model audio_classifier.joblib
 ```
 
@@ -134,27 +111,14 @@ The `train_audio_classifier.py` script:
 
 ### Model Performance
 
-The included pre-trained model was trained on a diverse dataset of audio samples and achieves:
-- **High accuracy** across all audio categories
-- **Robust classification** for kicks, 808s, snares, hi-hats, and more
-- **Fast inference** for real-time classification
-
-The training script outputs:
-- **Classification Report**: Precision, recall, F1-score per class
-- **Confusion Matrix**: Visual representation of predictions
-- **Feature Importance**: Which features matter most
-- **Accuracy Score**: Overall model performance
+The included pre-trained model was trained on a diverse dataset of audio samples and provides:
+- **Accurate classification** across all audio categories
+- **Confidence scores** for each prediction
+- **Fast processing** for real-time classification
 
 See `audio_classifier_results.png` for detailed performance metrics.
 
-### Files Generated
 
-After training, you'll get:
-- `audio_classifier.joblib`: Trained model
-- `audio_classifier_metadata.joblib`: Model metadata
-- `audio_classifier_results.png`: Performance visualizations
-
-**Note:** The repository already includes these files from our pre-trained model, so you can start using ML classification immediately without training.
 
 ## GUI Features
 

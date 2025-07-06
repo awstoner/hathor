@@ -73,6 +73,19 @@ def extract_features(file_path: Path) -> dict:
     spectral_contrast = float(np.mean(librosa.feature.spectral_contrast(y=y, sr=sr)))
     pitches, magnitudes = librosa.piptrack(y=y, sr=sr)
     pitch_strength = float(np.mean(magnitudes))
+    
+    # Additional features for ML
+    mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
+    mfcc_mean = float(np.mean(mfccs))
+    rms = librosa.feature.rms(y=y)
+    rms_mean = float(np.mean(rms))
+    zcr = librosa.feature.zero_crossing_rate(y)
+    zero_crossing_rate = float(np.mean(zcr))
+    spectral_bandwidth = float(np.mean(librosa.feature.spectral_bandwidth(y=y, sr=sr)))
+    spectral_flatness = float(np.mean(librosa.feature.spectral_flatness(y=y)))
+    chroma_stft = librosa.feature.chroma_stft(y=y, sr=sr)
+    chroma_stft_mean = float(np.mean(chroma_stft))
+    
     return {
         'duration': duration,
         'centroid_mean': centroid_mean,
@@ -82,6 +95,12 @@ def extract_features(file_path: Path) -> dict:
         'harmonic_ratio': harmonic_ratio,
         'spectral_contrast': spectral_contrast,
         'pitch_strength': pitch_strength,
+        'mfcc_mean': mfcc_mean,
+        'rms_mean': rms_mean,
+        'zero_crossing_rate': zero_crossing_rate,
+        'spectral_bandwidth': spectral_bandwidth,
+        'spectral_flatness': spectral_flatness,
+        'chroma_stft_mean': chroma_stft_mean,
     }
 
 def main():
